@@ -9,7 +9,7 @@ import { Messages } from "../components/Messages.jsx";
 import { ChatInput } from "../components/ChatInput.jsx";
 import { LoginPrompt } from "../components/LoginPrompt.jsx";
 
-const socket = io("http://localhost:8080");
+const socket = io("https://mangacommercebackend-production.up.railway.app");
 
 const Chat = () => {
   const { token, uid } = useAuth();

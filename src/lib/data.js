@@ -1,4 +1,4 @@
-const url = "http://localhost:8080/api";
+const url = "https://mangacommercebackend-production.up.railway.app/api";
 
 export async function fetchProductData(
   limit,

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import { showToast } from "./utils";
 
-const url = "http://localhost:8080/api";
+const url = "https://mangacommercebackend-production.up.railway.app/api";
 
 export function useLogin() {
   const navigate = useNavigate();
@@ -527,7 +527,7 @@ export async function recoverPassword(email, theme, setIsClicked) {
 
 export async function newPassword(password, token, theme) {
   const response = await fetch(
-    `http://localhost:8080/api/auth/new-password/${token}`,
+    `${url}/auth/new-password/${token}`,
     {
       method: "POST",
       headers: {

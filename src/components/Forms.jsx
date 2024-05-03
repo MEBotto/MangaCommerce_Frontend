@@ -49,7 +49,7 @@ export function FormLogin({ t }) {
   };
 
   const handleGithubLogin = async () => {
-    window.location.href = "http://localhost:8080/api/auth/github";
+    window.location.href = "https://mangacommercebackend-production.up.railway.app/api/auth/github";
   };
 
   return (
