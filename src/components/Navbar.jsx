@@ -1,0 +1,290 @@
+import { Link } from "react-router-dom";
+import useAuth from "../hooks/useAuth.js";
+import useTheme from "../hooks/useTheme.js";
+import { useLogout } from "../lib/actions.js";
+import { useEffect, useState } from "react";
+import { jwtDecode } from "jwt-decode";
+import { motion } from "framer-motion";
+import Button from "./Button.jsx";
+import NavLink from "./NavLink.jsx";
+
+const links = [
+  { name: "Home", path: "/" },
+  { name: "Products", path: "/products" },
+  { name: "Comics", path: "/products/comics" },
+  { name: "Dashboard", path: "/dashboard", role: "admin" },
+  { name: "Premium", path: "/dashboard/products", role: "premium" },
+];
+
+function Navbar() {
+  const { token, setToken, setUid, setRole, setName } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const logout = useLogout();
+  const [user, setUser] = useState(null);
+  const [open, setOpen] = useState(false);
+
+  const topVariants = {
+    closed: {
+      rotate: 0,
+    },
+    opened: {
+      rotate: 45,
+    },
+  };
+
+  const centerVariants = {
+    closed: {
+      opacity: 1,
+    },
+    opened: {
+      opacity: 0,
+    },
+  };
+
+  const bottomVariants = {
+    closed: {
+      rotate: 0,
+    },
+    opened: {
+      rotate: -45,
+    },
+  };
+
+  const listVariants = {
+    closed: {
+      x: "10vw",
+    },
+    opened: {
+      x: 0,
+      transition: {
+        when: "beforeChildren",
+        staggerChildren: 0.2,
+      },
+    },
+  };
+
+  const listItemVariants = {
+    closed: {
+      x: -100,
+      opacity: 0,
+    },
+    opened: {
+      x: 0,
+      opacity: 1,
+    },
+  };
+
+  useEffect(() => {
+    if (token) {
+      const { user } = jwtDecode(token);
+      setUser(user);
+      setUid(user.userId);
+      setRole(user.role);
+      setName(user.name);
+    } else {
+      setUser(null);
+    }
+  }, [token, setToken, setUid, setRole, setName]);
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
+  return (
+    <nav
+      className={`${
+        theme === "dark" ? "bg-zinc-900 text-white" : "bg-white text-black"
+      } fixed top-0 left-0 w-screen h-[90px] flex items-center py-4 px-4 sm:px-8 md:px-12 lg:px-20 xl:px-48 text-lg z-50`}
+    >
+      <div className="w-screen flex items-center justify-between">
+        <div className="hidden lg:flex gap-4 w-1/2 2xl:w-1/3">
+          {links.map((link) => (
+            <NavLink
+              key={link.name}
+              link={link}
+              role={user?.role}
+              theme={theme}
+            />
+          ))}
+        </div>
+        <div className="lg:hidden 2xl:flex 2xl:w-1/3 xl:justify-center">
+          <Link to={"/"}>
+            {theme === "dark" ? (
+              <img src="/logo_dark.webp" alt="Logo dark" className="h-14" />
+            ) : (
+              <img src="/logo_light.webp" alt="Logo light" className="h-14" />
+            )}
+          </Link>
+        </div>
+        <div className="hidden lg:flex gap-4 w-1/2 2xl:w-1/3 justify-end items-center">
+          {user ? (
+            <div className="flex gap-2">
+              <Link to={"/profile"} className="flex gap-4 items-center">
+                <img
+                  src={user.photo}
+                  alt={`Avatar of ${user.name}`}
+                  className="w-10 rounded-full"
+                />
+                <p>{user.name}</p>
+              </Link>
+              <Button
+                onClickFunction={handleLogout}
+                iconName={"ri-logout-box-line"}
+                iSize={"text-3xl"}
+              />
+            </div>
+          ) : (
+            <>
+              <Link to={"/login"}>
+                <Button
+                  text={"Log in"}
+                  iconName={"ri-login-box-fill"}
+                  className={"font-bold"}
+                  iClass={"font-normal"}
+                />
+              </Link>
+              <Link to={"/register"}>
+                <Button
+                  text={"Sign Up"}
+                  className={`${
+                    theme === "dark"
+                      ? "bg-mainColor text-black"
+                      : "bg-mainColorLight text-white"
+                  } p-2 rounded-xl font-bold`}
+                />
+              </Link>
+            </>
+          )}
+          <div className="flex gap-0">
+            <Button
+              onClickFunction={toggleTheme}
+              iconName={theme === "dark" ? "ri-moon-fill" : "ri-sun-fill"}
+              iSize={"text-3xl"}
+            />
+            <Link to={"/cart"}>
+              <Button iconName={"ri-shopping-cart-2-fill"} iSize={"text-3xl"} />
+            </Link>
+          </div>
+        </div>
+        <div className="lg:hidden">
+          <button
+            className="w-10 h-8 flex flex-col justify-between z-50 relative"
+            onClick={() => setOpen(!open)}
+          >
+            <motion.div
+              variants={topVariants}
+              animate={open ? "opened" : "closed"}
+              className={`w-10 h-1 ${
+                theme === "dark" ? "bg-white" : "bg-black"
+              } rounded origin-left`}
+            ></motion.div>
+            <motion.div
+              variants={centerVariants}
+              animate={open ? "opened" : "closed"}
+              className={`w-10 h-1 ${
+                theme === "dark" ? "bg-white" : "bg-black"
+              } rounded`}
+            ></motion.div>
+            <motion.div
+              variants={bottomVariants}
+              animate={open ? "opened" : "closed"}
+              className={`w-10 h-1 ${
+                theme === "dark" ? "bg-white" : "bg-black"
+              } rounded origin-left`}
+            ></motion.div>
+          </button>
+          {open && (
+            <motion.div
+              variants={listVariants}
+              initial="closed"
+              animate="opened"
+              className={`absolute top-0 left-0 w-screen h-screen ${
+                theme === "dark" ? "bg-black text-white" : "bg-white text-black"
+              } flex flex-col items-center justify-center gap-8 text-4xl z-40`}
+            >
+              {links.map((link) => {
+                if (link.role && user?.role !== link.role) {
+                  return null;
+                }
+                return (
+                  <motion.div variants={listItemVariants} key={link.name}>
+                    <Link to={link.path} onClick={() => setOpen(false)}>
+                      {link.name}
+                    </Link>
+                  </motion.div>
+                );
+              })}
+              {user ? (
+                <motion.div variants={listItemVariants} className="flex gap-2">
+                  <Link
+                    to={"/profile"}
+                    onClick={() => setOpen(false)}
+                    className="flex gap-4 items-center"
+                  >
+                    <img
+                      src={user.photo}
+                      alt={`Avatar of ${user.name}`}
+                      className={`w-10 rounded-full ${
+                        theme === "dark" ? "bg-white" : ""
+                      }`}
+                    />
+                    <p>{user.name}</p>
+                  </Link>
+                  <div onClick={() => setOpen(false)}>
+                    <Button
+                      onClickFunction={handleLogout}
+                      iconName={"ri-logout-box-line"}
+                      iSize={"text-4xl"}
+                    />
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  variants={listItemVariants}
+                  className="flex gap-4 items-center"
+                >
+                  <Link to={"/login"} onClick={() => setOpen(false)}>
+                    <Button
+                      text={"Log in"}
+                      iconName={"ri-login-box-fill"}
+                      className={"font-bold"}
+                      iClass={"font-normal"}
+                      iSize={"text-4xl"}
+                    />
+                  </Link>
+                  <Link to={"/register"} onClick={() => setOpen(false)}>
+                    <Button
+                      text={"Sign Up"}
+                      className={`${
+                        theme === "dark"
+                          ? "bg-mainColor text-black"
+                          : "bg-mainColorLight text-white"
+                      } p-2 rounded-xl font-bold`}
+                    />
+                  </Link>
+                </motion.div>
+              )}
+              <motion.div variants={listItemVariants} className="flex gap-0">
+                <div onClick={() => setOpen(false)}>
+                  <Button
+                    onClickFunction={toggleTheme}
+                    iconName={theme === "dark" ? "ri-moon-fill" : "ri-sun-fill"}
+                    iSize={"text-6xl"}
+                  />
+                </div>
+                <Link to={"/cart"} onClick={() => setOpen(false)}>
+                  <Button
+                    iconName={"ri-shopping-cart-2-fill"}
+                    iSize={"text-6xl"}
+                  />
+                </Link>
+              </motion.div>
+            </motion.div>
+          )}
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+export default Navbar;
